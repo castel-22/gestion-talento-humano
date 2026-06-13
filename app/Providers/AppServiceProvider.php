@@ -21,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Forzar HTTPS en entorno de producción
+        if (config('app.env') === 'production') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Detectar lazy loading en desarrollo para encontrar N+1 queries
         Model::preventLazyLoading(! app()->isProduction());
 
