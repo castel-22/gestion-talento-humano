@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'SGTH') }} - Acceso Institucional</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo_pc.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,6 +15,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .swal-popup-custom {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            border-radius: 1.25rem !important;
+            border-top: 4px solid #F97316 !important;
+        }
+    </style>
 
     <style>
         :root {
@@ -325,5 +337,69 @@
             }
         });
     </script>
+
+    {{-- SweetAlert2: Notificaciones de sesión (guest) --}}
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Operación Exitosa!',
+                text: '{{ addslashes(session('success')) }}',
+                confirmButtonColor: '#F97316',
+                confirmButtonText: 'Aceptar',
+                timer: 5000,
+                timerProgressBar: true,
+                customClass: { popup: 'swal-popup-custom' }
+            });
+        });
+    </script>
+    @endif
+
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: '¡Error!',
+                text: '{{ addslashes(session('error')) }}',
+                confirmButtonColor: '#E63946',
+                confirmButtonText: 'Entendido',
+                customClass: { popup: 'swal-popup-custom' }
+            });
+        });
+    </script>
+    @endif
+
+    @if(session('warning'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'warning',
+                title: '¡Atención!',
+                text: '{{ addslashes(session('warning')) }}',
+                confirmButtonColor: '#F97316',
+                confirmButtonText: 'Entendido',
+                customClass: { popup: 'swal-popup-custom' }
+            });
+        });
+    </script>
+    @endif
+
+    @if(session('info'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Información',
+                text: '{{ addslashes(session('info')) }}',
+                confirmButtonColor: '#0B3B5E',
+                confirmButtonText: 'Entendido',
+                customClass: { popup: 'swal-popup-custom' }
+            });
+        });
+    </script>
+    @endif
+
 </body>
 </html>

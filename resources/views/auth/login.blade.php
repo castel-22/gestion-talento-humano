@@ -1,6 +1,23 @@
 <x-guest-layout>
     <x-auth-session-status class="mb-6" :status="session('status')" />
 
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Operación Exitosa!',
+                text: '{{ addslashes(session('success')) }}',
+                confirmButtonColor: '#F97316',
+                confirmButtonText: 'Aceptar',
+                timer: 5000,
+                timerProgressBar: true,
+                customClass: { popup: 'swal-popup-custom' }
+            });
+        });
+    </script>
+    @endif
+
     <div class="mb-4 text-center">
         <h2 class="text-xs font-black text-pc-orange uppercase tracking-[0.3em] mb-1">Acceso de Seguridad</h2>
         <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest opacity-60 transition-colors">Control de Integridad de Datos</p>
@@ -72,7 +89,7 @@
                     </label>
 
                     <a class="text-[9px] font-black text-gray-500 dark:text-gray-400 hover:text-pc-blue dark:hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2 group" 
-                       href="{{ route('password.questions.email') }}">
+                       href="{{ route('password.choice') }}">
                         <div class="w-7 h-7 rounded-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center group-hover:bg-pc-orange group-hover:border-pc-orange group-hover:text-white transition-all shadow-sm">
                             <i class="fas fa-unlock-keyhole text-[9px]"></i>
                         </div>

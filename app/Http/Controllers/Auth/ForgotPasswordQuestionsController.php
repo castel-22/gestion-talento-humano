@@ -125,6 +125,6 @@ class ForgotPasswordQuestionsController extends Controller
         // Limpiar sesión
         Session::forget(['password_reset_user_id', 'password_reset_verified']);
 
-        return redirect()->route('login')->with('status', 'Contraseña actualizada correctamente. Ahora puedes iniciar sesión.');
+        return redirect()->route('login')->with('success', '¡Contraseña actualizada correctamente! Ahora puedes iniciar sesión con tu nueva clave.');
     }
 }
