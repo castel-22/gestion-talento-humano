@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-6 text-center">
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pc-orange/10 to-orange-50 dark:from-pc-orange/20 dark:to-orange-900/10 flex items-center justify-center mx-auto mb-4 shadow-sm">
-            <i class="fas fa-shield-question text-2xl text-pc-orange"></i>
+            <i class="fas fa-user-shield text-2xl text-pc-orange"></i>
         </div>
         <h2 class="text-xs font-black text-pc-orange uppercase tracking-[0.3em] mb-1">Verificación de Identidad</h2>
         <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest opacity-60">Paso 1 de 3 — Ingresa tu correo institucional</p>

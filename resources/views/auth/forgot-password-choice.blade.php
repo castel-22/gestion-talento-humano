@@ -13,7 +13,7 @@
             <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all duration-300
                         bg-gradient-to-br from-pc-orange/10 to-orange-50 dark:from-pc-orange/20 dark:to-orange-900/10
                         group-hover:from-pc-orange group-hover:to-orange-500 shadow-sm">
-                <i class="fas fa-shield-question text-xl text-pc-orange group-hover:text-white transition-colors duration-300"></i>
+                <i class="fas fa-user-shield text-xl text-pc-orange group-hover:text-white transition-colors duration-300"></i>
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-[10px] font-black text-pc-blue dark:text-white uppercase tracking-widest mb-1 group-hover:text-pc-orange transition-colors">Preguntas de Seguridad</p>
