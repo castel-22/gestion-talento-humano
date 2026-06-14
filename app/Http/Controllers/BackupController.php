@@ -37,10 +37,10 @@ class BackupController extends Controller
         $dbUsername = config('database.connections.mysql.username', 'root');
         $dbPassword = config('database.connections.mysql.password', '');
 
-        // 4. Ubicación de mysqldump en XAMPP
-        $mysqldumpPath = 'c:\\xampp\\mysql\\bin\\mysqldump.exe';
+        // 4. Ubicación de mysqldump en XAMPP o Linux
+        $mysqldumpPath = (PHP_OS_FAMILY === 'Windows') ? 'c:\\xampp\\mysql\\bin\\mysqldump.exe' : 'mysqldump';
 
-        if (!file_exists($mysqldumpPath)) {
+        if (PHP_OS_FAMILY === 'Windows' && !file_exists($mysqldumpPath)) {
             $mysqldumpPath = 'mysqldump';
         }
 
@@ -57,7 +57,7 @@ class BackupController extends Controller
             $absolutePath
         );
 
-        $cmd = "cmd.exe /c " . $command;
+        $cmd = (PHP_OS_FAMILY === 'Windows') ? "cmd.exe /c " . $command : $command;
         exec($cmd, $output, $resultCode);
 
         // Verificar que el archivo se haya creado y no esté vacío
@@ -113,10 +113,10 @@ class BackupController extends Controller
         $dbUsername = config('database.connections.mysql.username', 'root');
         $dbPassword = config('database.connections.mysql.password', '');
 
-        // 2. Ubicación de mysql.exe en XAMPP
-        $mysqlPath = 'c:\\xampp\\mysql\\bin\\mysql.exe';
+        // 2. Ubicación de mysql.exe en XAMPP o Linux
+        $mysqlPath = (PHP_OS_FAMILY === 'Windows') ? 'c:\\xampp\\mysql\\bin\\mysql.exe' : 'mysql';
 
-        if (!file_exists($mysqlPath)) {
+        if (PHP_OS_FAMILY === 'Windows' && !file_exists($mysqlPath)) {
             $mysqlPath = 'mysql';
         }
 
@@ -133,7 +133,7 @@ class BackupController extends Controller
             $absolutePath
         );
 
-        $cmd = "cmd.exe /c " . $command;
+        $cmd = (PHP_OS_FAMILY === 'Windows') ? "cmd.exe /c " . $command : $command;
         exec($cmd, $output, $resultCode);
 
         if ($resultCode === 0) {
