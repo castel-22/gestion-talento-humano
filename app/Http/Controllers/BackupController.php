@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Ifsnop\Mysqldump as IMysqldump;
+use App\Helpers\ActivityLogger;
 
 class BackupController extends Controller
 {
@@ -64,6 +65,8 @@ class BackupController extends Controller
                     'created_by' => Auth::id()
                 ]);
 
+                ActivityLogger::log('create', 'backups', "Se generó un nuevo respaldo de la base de datos: {$filename}");
+
                 return redirect()->route('backups.index')->with('success', 'El respaldo de la base de datos se ha generado exitosamente (' . number_format($sizeInKb, 2) . ' KB).');
             }
 
@@ -77,7 +80,11 @@ class BackupController extends Controller
     {
         $this->authorize('delete', $backup);
         Storage::disk('local')->delete($backup->path);
+        $filename = $backup->filename;
         $backup->delete();
+
+        ActivityLogger::log('delete', 'backups', "Se eliminó el respaldo de la base de datos: {$filename}");
+
         return redirect()->route('backups.index')->with('success', 'Respaldo eliminado.');
     }
 
@@ -105,6 +112,8 @@ class BackupController extends Controller
         try {
             $sql = file_get_contents($absolutePath);
             DB::unprepared($sql);
+
+            ActivityLogger::log('update', 'backups', "Se restauró la base de datos a partir del respaldo: {$backup->filename}");
 
             return redirect()->route('backups.index')->with('success', 'El sistema ha sido restaurado exitosamente al punto seleccionado.');
         } catch (\Exception $e) {
@@ -155,6 +164,8 @@ class BackupController extends Controller
                     'created_by' => Auth::id()
                 ]);
                 
+                ActivityLogger::log('create', 'backups', "Se subió un respaldo de base de datos de origen externo: {$filename}");
+
                 return redirect()->route('backups.index')
                     ->with('success', 'El respaldo externo se ha subido exitosamente (' . number_format($sizeInKb, 2) . ' KB).');
             }

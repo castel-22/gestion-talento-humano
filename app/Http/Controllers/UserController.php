@@ -11,6 +11,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Helpers\ActivityLogger;
 
 class UserController extends Controller
 {
@@ -87,6 +88,8 @@ class UserController extends Controller
             ]);
         }
 
+        ActivityLogger::log('create', 'users', "Se creó el usuario: {$user->name} ({$user->email}) con rol {$request->role}");
+
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
     }
 
@@ -155,6 +158,8 @@ class UserController extends Controller
             }
         }
 
+        ActivityLogger::log('update', 'users', "Se actualizaron los datos/rol del usuario: {$user->name}");
+
         return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
@@ -164,7 +169,11 @@ class UserController extends Controller
         if ($user->id === Auth::id()) {
             return redirect()->route('users.index')->with('error', 'No puedes eliminarte a ti mismo.');
         }
+        $name = $user->name;
         $user->delete();
+
+        ActivityLogger::log('delete', 'users', "Se eliminó el usuario: {$name}");
+
         return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
     }
 

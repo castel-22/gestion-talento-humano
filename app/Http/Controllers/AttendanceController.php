@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AttendancesExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Helpers\ActivityLogger;
 
 class AttendanceController extends Controller
 {
@@ -82,7 +83,11 @@ class AttendanceController extends Controller
      */
     public function destroy(Attendance $attendance)
     {
+        $id = $attendance->id;
         $attendance->delete();
+
+        ActivityLogger::log('delete', 'attendances', "Se eliminó el registro de asistencia ID: {$id}");
+
         return redirect()->route('attendances.index')
             ->with('success', 'Registro eliminado correctamente.');
     }
@@ -99,6 +104,8 @@ class AttendanceController extends Controller
         $attendance->status = 'permission'; // Enum for 'justificado'
         $attendance->justification_reason = $request->reason;
         $attendance->save();
+
+        ActivityLogger::log('update', 'attendances', "Se justificó la asistencia ID: {$attendance->id} - Motivo: {$request->reason}");
 
         return redirect()->route('attendances.index')
             ->with('success', 'Asistencia justificada correctamente.');
@@ -203,6 +210,8 @@ class AttendanceController extends Controller
             $attendance->status   = 'present';
             $attendance->save();
 
+            ActivityLogger::log('create', 'attendances', "Se registró entrada del empleado ID: {$employeeId} a las {$now->format('H:i')}");
+
             return response()->json(['success' => true, 'message' => 'Entrada registrada a las ' . $now->format('H:i')]);
         }
 
@@ -215,6 +224,8 @@ class AttendanceController extends Controller
             }
             $attendance->check_out = $now->toTimeString();
             $attendance->save();
+
+            ActivityLogger::log('update', 'attendances', "Se registró salida del empleado ID: {$employeeId} a las {$now->format('H:i')}");
 
             return response()->json(['success' => true, 'message' => 'Salida registrada a las ' . $now->format('H:i')]);
         }

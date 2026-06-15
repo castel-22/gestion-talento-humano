@@ -20,6 +20,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Models\PdfReport;
 use App\Jobs\GenerateEmployeePdfReport;
 use Illuminate\Support\Facades\Storage;
+use App\Helpers\ActivityLogger;
 
 class ReportController extends Controller
 {
@@ -49,6 +50,7 @@ class ReportController extends Controller
     public function employeesExcel(Request $request)
     {
         $filters = $request->only(['department_id', 'status']);
+        ActivityLogger::log('export', 'reports', 'Se generó y descargó el reporte de personal (Excel)');
         return Excel::download(new EmployeesExport($filters), 'personal-'.now()->format('d-m-Y').'.xlsx');
     }
 
@@ -74,6 +76,8 @@ class ReportController extends Controller
 
         $pdf = Pdf::loadView('reports.employees-list', compact('employees', 'generatedAt'))
                   ->setPaper('a4', 'landscape');
+
+        ActivityLogger::log('export', 'reports', 'Se generó y descargó la lista general de personal (PDF)');
 
         return $pdf->download('lista-personal-'.now()->format('d-m-Y').'.pdf');
     }
@@ -118,6 +122,8 @@ class ReportController extends Controller
 
         $filename = 'hoja-vida-' . str_replace(' ', '-', strtolower($employee->full_name)) . '-' . now()->format('d-m-Y') . '.pdf';
 
+        ActivityLogger::log('export', 'reports', "Se generó y descargó la Hoja de Vida institucional de: {$employee->full_name}");
+
         return $pdf->download($filename);
     }
 
@@ -127,6 +133,7 @@ class ReportController extends Controller
     public function attendancesExcel(Request $request)
     {
         $filters = $request->only(['period', 'employee_id']);
+        ActivityLogger::log('export', 'reports', 'Se generó y descargó el reporte de asistencias (Excel)');
         return Excel::download(new AttendancesExport($filters), 'asistencias-'.now()->format('d-m-Y').'.xlsx');
     }
 
@@ -155,6 +162,8 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.attendances-list', compact('attendances', 'generatedAt', 'period'))
                   ->setPaper('a4', 'landscape');
 
+        ActivityLogger::log('export', 'reports', 'Se generó y descargó el listado de asistencias (PDF)');
+
         return $pdf->download('asistencias-'.now()->format('d-m-Y').'.pdf');
     }
 
@@ -164,6 +173,7 @@ class ReportController extends Controller
     public function vacationsExcel(Request $request)
     {
         $filters = $request->only(['year', 'status', 'employee_id']);
+        ActivityLogger::log('export', 'reports', 'Se generó y descargó el reporte de vacaciones (Excel)');
         return Excel::download(new VacationsExport($filters), 'vacaciones-'.now()->format('d-m-Y').'.xlsx');
     }
 
@@ -173,6 +183,7 @@ class ReportController extends Controller
     public function leavesExcel(Request $request)
     {
         $filters = $request->only(['year', 'employee_id']);
+        ActivityLogger::log('export', 'reports', 'Se generó y descargó el reporte de reposos médicos (Excel)');
         return Excel::download(new LeavesExport($filters), 'reposos-'.now()->format('d-m-Y').'.xlsx');
     }
 
@@ -185,6 +196,7 @@ class ReportController extends Controller
         if (empty($filters['year'])) {
             $filters['year'] = now()->year;
         }
+        ActivityLogger::log('export', 'reports', 'Se generó y descargó el reporte de rotación de guardias (Excel)');
         return Excel::download(new GuardsExport($filters), 'guardias-'.now()->format('d-m-Y').'.xlsx');
     }
 

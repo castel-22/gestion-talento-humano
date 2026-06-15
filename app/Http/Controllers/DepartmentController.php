@@ -6,6 +6,7 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Helpers\ActivityLogger;
 
 class DepartmentController extends Controller
 {
@@ -53,7 +54,10 @@ class DepartmentController extends Controller
             $data['logo'] = $path;
         }
 
-        Department::create($data);
+        $department = Department::create($data);
+        
+        ActivityLogger::log('create', 'departments', "Se creó el departamento: {$department->name}");
+        
         return redirect()->route('departments.index')->with('success', 'Departamento creado.');
     }
 
@@ -90,6 +94,9 @@ class DepartmentController extends Controller
         }
 
         $department->update($data);
+
+        ActivityLogger::log('update', 'departments', "Se actualizó el departamento: {$department->name}");
+
         return redirect()->route('departments.index')->with('success', 'Departamento actualizado.');
     }
 
@@ -99,7 +106,11 @@ class DepartmentController extends Controller
         if ($department->logo) {
             Storage::disk('public')->delete($department->logo);
         }
+        $name = $department->name;
         $department->delete();
+
+        ActivityLogger::log('delete', 'departments', "Se eliminó el departamento: {$name}");
+
         return redirect()->route('departments.index')->with('success', 'Departamento eliminado.');
     }
 
