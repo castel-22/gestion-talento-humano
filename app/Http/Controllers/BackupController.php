@@ -6,7 +6,9 @@ use App\Models\Backup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Ifsnop\Mysqldump as IMysqldump;
 
 class BackupController extends Controller
 {
@@ -37,55 +39,38 @@ class BackupController extends Controller
         $dbUsername = config('database.connections.mysql.username', 'root');
         $dbPassword = config('database.connections.mysql.password', '');
 
-        // 4. Ubicación de mysqldump en XAMPP o Linux
-        $mysqldumpPath = 'mysqldump';
-        if (PHP_OS_FAMILY === 'Windows') {
-            $mysqldumpPath = 'c:\\xampp\\mysql\\bin\\mysqldump.exe';
-            if (!file_exists($mysqldumpPath)) {
-                $mysqldumpPath = 'mysqldump';
+        try {
+            $dumpSettings = [
+                'add-drop-table' => true,
+                'no-data' => false,
+                'skip-triggers' => false,
+                'skip-comments' => false,
+                'skip-definer' => true,
+                'skip-tz-utc' => false,
+                'no-create-info' => false,
+            ];
+
+            $dump = new IMysqldump\Mysqldump("mysql:host={$dbHost};port={$dbPort};dbname={$dbDatabase}", $dbUsername, $dbPassword, $dumpSettings);
+            $dump->start($absolutePath);
+
+            // Verificar que el archivo se haya creado y no esté vacío
+            if (Storage::disk('local')->exists($path) && Storage::disk('local')->size($path) > 0) {
+                $sizeInKb = Storage::disk('local')->size($path) / 1024;
+
+                Backup::create([
+                    'filename' => $filename,
+                    'path' => $path,
+                    'size' => $sizeInKb,
+                    'created_by' => Auth::id()
+                ]);
+
+                return redirect()->route('backups.index')->with('success', 'El respaldo de la base de datos se ha generado exitosamente (' . number_format($sizeInKb, 2) . ' KB).');
             }
-        } else {
-            // Entorno Linux (Railway, Docker, etc)
-            $path = trim(shell_exec('which mysqldump 2>/dev/null'));
-            if (!$path) {
-                $path = trim(shell_exec('which mariadb-dump 2>/dev/null'));
-            }
-            if ($path) {
-                $mysqldumpPath = $path;
-            }
+
+            return redirect()->route('backups.index')->with('error', 'Ocurrió un error al generar el respaldo de la base de datos (Archivo vacío).');
+        } catch (\Exception $e) {
+            return redirect()->route('backups.index')->with('error', 'Ocurrió un error crítico al generar el respaldo: ' . $e->getMessage());
         }
-
-        // Construir comando con escapes correctos
-        $passwordPart = !empty($dbPassword) ? "-p" . escapeshellarg($dbPassword) : "";
-        $command = sprintf(
-            '%s --host=%s --port=%s --user=%s %s --no-tablespaces --column-statistics=0 %s > "%s"',
-            $mysqldumpPath,
-            escapeshellarg($dbHost),
-            escapeshellarg($dbPort),
-            escapeshellarg($dbUsername),
-            $passwordPart,
-            escapeshellarg($dbDatabase),
-            $absolutePath
-        );
-
-        $cmd = (PHP_OS_FAMILY === 'Windows') ? "cmd.exe /c " . $command : $command;
-        exec($cmd, $output, $resultCode);
-
-        // Verificar que el archivo se haya creado y no esté vacío
-        if ($resultCode === 0 && Storage::disk('local')->exists($path) && Storage::disk('local')->size($path) > 0) {
-            $sizeInKb = Storage::disk('local')->size($path) / 1024;
-
-            Backup::create([
-                'filename' => $filename,
-                'path' => $path,
-                'size' => $sizeInKb,
-                'created_by' => Auth::id()
-            ]);
-
-            return redirect()->route('backups.index')->with('success', 'El respaldo de la base de datos se ha generado exitosamente (' . number_format($sizeInKb, 2) . ' KB).');
-        }
-
-        return redirect()->route('backups.index')->with('error', 'Ocurrió un error al generar el respaldo de la base de datos (Código de salida: ' . $resultCode . ').');
     }
 
     public function destroy(Backup $backup)
@@ -117,57 +102,19 @@ class BackupController extends Controller
 
         $absolutePath = Storage::disk('local')->path($backup->path);
 
-        // 1. Obtener credenciales de base de datos
-        $dbHost = config('database.connections.mysql.host', '127.0.0.1');
-        $dbPort = config('database.connections.mysql.port', '3306');
-        $dbDatabase = config('database.connections.mysql.database', 'gestion_talento');
-        $dbUsername = config('database.connections.mysql.username', 'root');
-        $dbPassword = config('database.connections.mysql.password', '');
+        try {
+            $sql = file_get_contents($absolutePath);
+            DB::unprepared($sql);
 
-        // 2. Ubicación de mysql.exe en XAMPP o Linux
-        $mysqlPath = 'mysql';
-        if (PHP_OS_FAMILY === 'Windows') {
-            $mysqlPath = 'c:\\xampp\\mysql\\bin\\mysql.exe';
-            if (!file_exists($mysqlPath)) {
-                $mysqlPath = 'mysql';
-            }
-        } else {
-            // Entorno Linux (Railway, Docker, etc)
-            $path = trim(shell_exec('which mysql 2>/dev/null'));
-            if (!$path) {
-                $path = trim(shell_exec('which mariadb 2>/dev/null'));
-            }
-            if ($path) {
-                $mysqlPath = $path;
-            }
-        }
-
-        // Construir comando de restauración
-        $passwordPart = !empty($dbPassword) ? "-p" . escapeshellarg($dbPassword) : "";
-        $command = sprintf(
-            '%s --host=%s --port=%s --user=%s %s %s < "%s"',
-            $mysqlPath,
-            escapeshellarg($dbHost),
-            escapeshellarg($dbPort),
-            escapeshellarg($dbUsername),
-            $passwordPart,
-            escapeshellarg($dbDatabase),
-            $absolutePath
-        );
-
-        $cmd = (PHP_OS_FAMILY === 'Windows') ? "cmd.exe /c " . $command : $command;
-        exec($cmd, $output, $resultCode);
-
-        if ($resultCode === 0) {
             // Deslogueo para evitar inconsistencias de sesión con datos antiguos
             Auth::logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
 
             return redirect()->route('login')->with('success', 'El sistema ha sido restaurado exitosamente al punto seleccionado. Por favor, inicie sesión de nuevo.');
+        } catch (\Exception $e) {
+            return redirect()->route('backups.index')->with('error', 'Ocurrió un error al restaurar la base de datos: ' . $e->getMessage());
         }
-
-        return redirect()->route('backups.index')->with('error', 'Ocurrió un error al restaurar la base de datos (Código de salida: ' . $resultCode . ').');
     }
 
     public function create()
