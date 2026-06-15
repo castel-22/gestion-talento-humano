@@ -8,7 +8,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Facades\ActivityLogger;
+use App\Helpers\ActivityLogger;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class GuardRotationController extends Controller

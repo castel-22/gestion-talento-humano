@@ -64,7 +64,7 @@
                 @csrf
 
                 {{-- Buscador Autocompletado --}}
-                <div class="mb-8 relative z-10">
+                <div class="mb-8 relative z-50">
                     <label class="block text-[10px] font-black text-pc-blue dark:text-gray-300 mb-2 uppercase tracking-widest">
                         Buscar Empleado <span class="text-gray-400 font-bold ml-1">(Cédula o Nombre)</span> <span class="text-pc-red">*</span>
                     </label>

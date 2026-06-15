@@ -7,7 +7,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Facades\ActivityLogger;
+use App\Helpers\ActivityLogger;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class LeaveController extends Controller
