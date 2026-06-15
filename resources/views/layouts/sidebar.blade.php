@@ -144,10 +144,12 @@
                 <i class="fas fa-user-shield"></i>
                 <span>Usuarios del Sistema</span>
             </a>
+            @role('administrador')
             <a href="{{ route('activity-logs.index') }}" class="sidebar-link {{ request()->routeIs('activity-logs.*') ? 'active' : '' }}">
                 <i class="fas fa-clock-rotate-left"></i>
                 <span>Auditoría de Acciones</span>
             </a>
+            @endrole
         @endcan
 
         @if (Route::has('permissions.index'))

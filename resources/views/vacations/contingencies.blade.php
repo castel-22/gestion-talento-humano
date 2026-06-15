@@ -233,19 +233,47 @@
                         },
                         body: JSON.stringify(this.form)
                     });
-                    if (res.ok) window.location.reload();
-                } catch (e) { console.error(e); }
+                    if (res.ok) {
+                        await Swal.fire('Guardado', 'El plan se configuró correctamente.', 'success');
+                        window.location.reload();
+                    } else {
+                        Swal.fire('Error', 'Ocurrió un problema al intentar guardar.', 'error');
+                    }
+                } catch (e) { 
+                    console.error(e);
+                    Swal.fire('Error', 'Error de conexión con el servidor.', 'error');
+                }
             },
 
             async deletePlan(id) {
-                if (!confirm('¿Eliminar este plan de contingencia?')) return;
+                const result = await Swal.fire({
+                    title: '¿Eliminar plan de contingencia?',
+                    text: 'Esta acción revertirá los bloqueos para estas fechas.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (!result.isConfirmed) return;
+
                 try {
                     const res = await fetch(`{{ url('/vacations/contingencies') }}/${id}`, {
                         method: 'DELETE',
                         headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                     });
-                    if (res.ok) window.location.reload();
-                } catch (e) { console.error(e); }
+                    if (res.ok) {
+                        await Swal.fire('Eliminado', 'El plan ha sido eliminado.', 'success');
+                        window.location.reload();
+                    } else {
+                        Swal.fire('Error', 'Ocurrió un error al intentar eliminar.', 'error');
+                    }
+                } catch (e) { 
+                    console.error(e);
+                    Swal.fire('Error', 'Error de conexión.', 'error');
+                }
             }
         };
     }

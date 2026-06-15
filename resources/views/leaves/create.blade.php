@@ -45,6 +45,21 @@
                 </div>
             </div>
 
+            @if($errors->any() || session('error'))
+            <div class="m-5 mb-0 bg-red-50 border-l-4 border-red-500 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0"><i class="fas fa-exclamation-circle text-red-500"></i></div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-bold text-red-700">Ocurrieron los siguientes errores:</h3>
+                        <ul class="mt-1 list-disc list-inside text-xs text-red-600 font-medium">
+                            @if(session('error')) <li>{{ session('error') }}</li> @endif
+                            @foreach($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <form method="POST" action="{{ route('leaves.store') }}" id="leave-form" class="p-5" @@submit.prevent="submitForm">
                 @csrf
 
@@ -209,7 +224,7 @@
                 }
                 this.isSearching = true;
                 try {
-                    const response = await fetch(`{{ url('/api/employees/search') }}?q=${encodeURIComponent(this.searchTerm)}`);
+                    const response = await fetch(`{{ url('/api/employees/autocomplete') }}?q=${encodeURIComponent(this.searchTerm)}`);
                     if (response.ok) {
                         this.suggestions = await response.json();
                         this.showSuggestions = this.suggestions.length > 0;

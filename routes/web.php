@@ -139,6 +139,7 @@ Route::middleware('auth')->group(function () {
     // ==================== MÓDULO DE DESPLIEGUES ====================
     Route::resource('deployments', DeploymentController::class);
     Route::post('deployments/{deployment}/change-status', [DeploymentController::class, 'changeStatus'])->name('deployments.change-status');
+    Route::patch('deployments/{deployment}/complete', [DeploymentController::class, 'complete'])->name('deployments.complete');
     Route::get('deployments/{deployment}/pdf', [DeploymentController::class, 'pdf'])->name('deployments.pdf');
     Route::get('deployments/widget', [DeploymentController::class, 'widget'])->name('deployments.widget');
 

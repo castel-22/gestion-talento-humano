@@ -38,16 +38,27 @@ class BackupController extends Controller
         $dbPassword = config('database.connections.mysql.password', '');
 
         // 4. Ubicación de mysqldump en XAMPP o Linux
-        $mysqldumpPath = (PHP_OS_FAMILY === 'Windows') ? 'c:\\xampp\\mysql\\bin\\mysqldump.exe' : 'mysqldump';
-
-        if (PHP_OS_FAMILY === 'Windows' && !file_exists($mysqldumpPath)) {
-            $mysqldumpPath = 'mysqldump';
+        $mysqldumpPath = 'mysqldump';
+        if (PHP_OS_FAMILY === 'Windows') {
+            $mysqldumpPath = 'c:\\xampp\\mysql\\bin\\mysqldump.exe';
+            if (!file_exists($mysqldumpPath)) {
+                $mysqldumpPath = 'mysqldump';
+            }
+        } else {
+            // Entorno Linux (Railway, Docker, etc)
+            $path = trim(shell_exec('which mysqldump 2>/dev/null'));
+            if (!$path) {
+                $path = trim(shell_exec('which mariadb-dump 2>/dev/null'));
+            }
+            if ($path) {
+                $mysqldumpPath = $path;
+            }
         }
 
         // Construir comando con escapes correctos
         $passwordPart = !empty($dbPassword) ? "-p" . escapeshellarg($dbPassword) : "";
         $command = sprintf(
-            '%s --host=%s --port=%s --user=%s %s %s > "%s"',
+            '%s --host=%s --port=%s --user=%s %s --no-tablespaces --column-statistics=0 %s > "%s"',
             $mysqldumpPath,
             escapeshellarg($dbHost),
             escapeshellarg($dbPort),
@@ -114,10 +125,21 @@ class BackupController extends Controller
         $dbPassword = config('database.connections.mysql.password', '');
 
         // 2. Ubicación de mysql.exe en XAMPP o Linux
-        $mysqlPath = (PHP_OS_FAMILY === 'Windows') ? 'c:\\xampp\\mysql\\bin\\mysql.exe' : 'mysql';
-
-        if (PHP_OS_FAMILY === 'Windows' && !file_exists($mysqlPath)) {
-            $mysqlPath = 'mysql';
+        $mysqlPath = 'mysql';
+        if (PHP_OS_FAMILY === 'Windows') {
+            $mysqlPath = 'c:\\xampp\\mysql\\bin\\mysql.exe';
+            if (!file_exists($mysqlPath)) {
+                $mysqlPath = 'mysql';
+            }
+        } else {
+            // Entorno Linux (Railway, Docker, etc)
+            $path = trim(shell_exec('which mysql 2>/dev/null'));
+            if (!$path) {
+                $path = trim(shell_exec('which mariadb 2>/dev/null'));
+            }
+            if ($path) {
+                $mysqlPath = $path;
+            }
         }
 
         // Construir comando de restauración

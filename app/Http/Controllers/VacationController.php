@@ -8,6 +8,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Facades\ActivityLogger;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class VacationController extends Controller
@@ -125,7 +126,8 @@ class VacationController extends Controller
     {
         $this->authorize('create', Vacation::class);
         $employees = Employee::where('status', 'activo')->orderBy('first_name')->get();
-        return view('vacations.create', compact('employees'));
+        $contingencyPlans = \App\Models\ContingencyPlan::orderBy('start_date')->get();
+        return view('vacations.create', compact('employees', 'contingencyPlans'));
     }
 
     /**
@@ -187,6 +189,8 @@ class VacationController extends Controller
             'status'      => Vacation::STATUS_PENDIENTE,
         ]);
 
+        ActivityLogger::log('create', 'vacations', "Se registró una solicitud de vacaciones para el empleado ID: {$vacation->employee_id}");
+
         // Notificar a administradores
         $admins = \App\Models\User::role('administrador')->get();
         \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\SystemAlert(
@@ -223,7 +227,8 @@ class VacationController extends Controller
     {
         $this->authorize('update', $vacation);
         $employees = Employee::orderBy('first_name')->get();
-        return view('vacations.edit', compact('vacation', 'employees'));
+        $contingencyPlans = \App\Models\ContingencyPlan::orderBy('start_date')->get();
+        return view('vacations.edit', compact('vacation', 'employees', 'contingencyPlans'));
     }
 
     /**
@@ -299,6 +304,8 @@ class VacationController extends Controller
             'accumulated_days_used' => $accumulatedDaysToTake,
         ]);
 
+        ActivityLogger::log('update', 'vacations', "Se actualizó la solicitud de vacaciones ID: {$vacation->id}");
+
         return redirect()->route('vacations.index')->with('success', 'Solicitud actualizada.');
     }
 
@@ -308,7 +315,9 @@ class VacationController extends Controller
     public function destroy(Vacation $vacation)
     {
         $this->authorize('delete', $vacation);
+        $id = $vacation->id;
         $vacation->delete();
+        ActivityLogger::log('delete', 'vacations', "Se eliminó la solicitud de vacaciones ID: {$id}");
         return redirect()->route('vacations.index')->with('success', 'Solicitud eliminada.');
     }
 
@@ -335,6 +344,8 @@ class VacationController extends Controller
             'status'      => Vacation::STATUS_APROBADO,
             'approved_by' => Auth::id(),
         ]);
+
+        ActivityLogger::log('update', 'vacations', "Se aprobó la solicitud de vacaciones ID: {$vacation->id}");
 
         return back()->with('success', 'Vacaciones aprobadas.');
     }

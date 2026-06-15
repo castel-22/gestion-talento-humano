@@ -20,6 +20,7 @@
      data-initial-end-date="{{ old('end_date', $vacation->end_date->format('Y-m-d')) }}"
      data-initial-reg-days="{{ old('regular_days_to_take', $regUsedByThis) }}"
      data-initial-acc-days="{{ old('accumulated_days_to_take', $accUsedByThis) }}"
+     data-contingencies="{{ $contingencyPlans->toJson() }}"
 ></div>
 
 <div class="py-6" x-data="editVacationForm()" x-cloak>
@@ -62,13 +63,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
-                        <input type="date" name="start_date" x-model="form.start_date" @@change="calculateEndDate" required
+                        <input type="date" name="start_date" x-model="form.start_date" @change="calculateEndDate" required
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-pc-orange focus:ring focus:ring-pc-orange focus:ring-opacity-50">
                     </div>
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
-                        <input type="date" name="end_date" x-model="form.end_date" required
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-pc-orange focus:ring focus:ring-pc-orange focus:ring-opacity-50 bg-gray-50" readonly>
+                        <input type="date" name="end_date" x-model="form.end_date" required min="{{ date('Y-m-d') }}"
+                               class="w-full border-gray-300 rounded-lg shadow-sm bg-gray-50 cursor-not-allowed border-dashed text-gray-500" readonly>
+                        <p class="text-[10px] text-pc-orange mt-1">Se calcula omitiendo fines de semana y contingencias</p>
                     </div>
                 </div>
 
@@ -77,12 +79,12 @@
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label for="regular_days_to_take" class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Días Regulares</label>
-                            <input type="number" name="regular_days_to_take" x-model="form.reg_days" @@input="updateTotalDays" required min="0" :max="regAvailable"
+                            <input type="number" name="regular_days_to_take" x-model="form.reg_days" @input="updateTotalDays" required min="0" :max="regAvailable"
                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-pc-blue focus:ring focus:ring-pc-blue focus:ring-opacity-50">
                         </div>
                         <div>
                             <label for="accumulated_days_to_take" class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Días Acumulados</label>
-                            <input type="number" name="accumulated_days_to_take" x-model="form.acc_days" @@input="updateTotalDays" required min="0" :max="accAvailable"
+                            <input type="number" name="accumulated_days_to_take" x-model="form.acc_days" @input="updateTotalDays" required min="0" :max="accAvailable"
                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-pc-orange focus:ring focus:ring-pc-orange focus:ring-opacity-50">
                         </div>
                     </div>

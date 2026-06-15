@@ -207,6 +207,13 @@ class DeploymentController extends Controller
         return back()->with('success', 'Estado actualizado.');
     }
 
+    public function complete(Deployment $deployment)
+    {
+        $deployment->update(['status' => 'finalizado']);
+        ActivityLogger::log('update', 'deployments', "Se marcó como finalizado el despliegue en: {$deployment->place}");
+        return back()->with('success', 'Misión marcada como finalizada.');
+    }
+
     public function pdf(Deployment $deployment)
     {
         $deployment->load(['supervisor', 'participants']);

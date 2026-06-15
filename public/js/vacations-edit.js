@@ -14,8 +14,14 @@ document.addEventListener('alpine:init', () => {
         const initialEndDate = dataEl?.dataset.initialEndDate || '';
         const initialRegDays = parseInt(dataEl?.dataset.initialRegDays) || 0;
         const initialAccDays = parseInt(dataEl?.dataset.initialAccDays) || 0;
+        
+        let contingencies = [];
+        try {
+            contingencies = JSON.parse(dataEl?.dataset.contingencies || '[]');
+        } catch(e) {}
 
         return {
+            contingencies: contingencies,
             regAvailable: regAvailable,
             accAvailable: accAvailable,
             availableDays: availableDays,
@@ -31,20 +37,47 @@ document.addEventListener('alpine:init', () => {
             daysError: '',
             isSubmitting: false,
 
+            calculateEndDate() {
+                if (!this.form.start_date || this.totalDays <= 0) {
+                    this.form.end_date = '';
+                    return;
+                }
+
+                let remainingDays = this.totalDays;
+                let curDate = new Date(this.form.start_date + 'T00:00:00');
+                
+                while (remainingDays > 0) {
+                    const dayOfWeek = curDate.getDay();
+                    const dateString = curDate.toISOString().split('T')[0];
+                    
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                    let isContingency = false;
+                    
+                    for (let plan of this.contingencies) {
+                        if (dateString >= plan.start_date && dateString <= plan.end_date) {
+                            isContingency = true;
+                            break;
+                        }
+                    }
+
+                    if (!isWeekend && !isContingency) {
+                        remainingDays--;
+                    }
+
+                    if (remainingDays > 0) {
+                        curDate.setDate(curDate.getDate() + 1);
+                    }
+                }
+
+                this.form.end_date = curDate.toISOString().split('T')[0];
+                this.validateDays();
+            },
+
             updateTotalDays() {
                 const reg = parseInt(this.form.reg_days) || 0;
                 const acc = parseInt(this.form.acc_days) || 0;
                 this.totalDays = reg + acc;
                 this.calculateEndDate();
-                this.validateDays();
-            },
-
-            calculateEndDate() {
-                if (!this.form.start_date || this.totalDays <= 0) return;
-                const start = new Date(this.form.start_date);
-                const end = new Date(start);
-                end.setDate(start.getDate() + this.totalDays - 1);
-                this.form.end_date = end.toISOString().split('T')[0];
             },
 
             validateDays() {

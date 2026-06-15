@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4" x-data="vacationForm()">
+<div class="py-4" x-data="vacationForm({{ $contingencyPlans->toJson() }})">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Encabezado Mejorado --}}
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -169,15 +169,14 @@
                         </div>
 
                         <div class="group">
-                            <label for="end_date" class="label-pc mb-2">Fecha de Culminación <span class="text-gray-400 font-bold ml-1">(Calculada)</span> <span class="text-pc-red">*</span></label>
+                            <label for="end_date" class="label-pc mb-2">Fecha de Culminación <span class="text-pc-red">*</span></label>
                             <div class="relative">
                                 <i class="fas fa-calendar-check absolute left-4 top-3.5 text-gray-400"></i>
                                 <input type="date" name="end_date" id="end_date" x-model="form.end_date" required min="{{ date('Y-m-d') }}"
-                                       class="input-pc pl-12 bg-gray-100 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 font-bold border-dashed cursor-not-allowed"
-                                       :readonly="autoCalculate">
+                                       class="input-pc pl-12 bg-gray-100 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 font-bold border-dashed cursor-not-allowed" readonly>
                             </div>
-                            <p class="text-[10px] text-pc-blue dark:text-blue-400 mt-2 font-black uppercase tracking-wider flex items-center gap-1.5" x-show="autoCalculate">
-                                <i class="fas fa-magic animate-bounce text-pc-orange"></i> Cálculo automático basado en días solicitados
+                            <p class="text-[10px] text-pc-orange dark:text-orange-400 mt-2 font-black uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-info-circle text-pc-orange"></i> Se calcula omitiendo fines de semana y contingencias
                             </p>
                             @error('end_date')<p class="mt-1 text-xs text-red-600 font-bold">{{ $message }}</p>@enderror
                         </div>
@@ -194,15 +193,13 @@
                                 <div class="group">
                                     <label for="regular_days_to_take" class="label-pc mb-2">Días Regulares</label>
                                     <input type="number" name="regular_days_to_take" id="regular_days_to_take" 
-                                           x-model="form.regular_days" @input="updateTotalDays" 
-                                           required min="0" :max="employee.regular_available"
+                                           x-model="form.regular_days" @input="updateTotalDays" required min="0" :max="employee.regular_available"
                                            class="input-pc dark:bg-slate-800 dark:border-slate-700 dark:text-white text-center font-bold">
                                 </div>
                                 <div class="group">
                                     <label for="accumulated_days_to_take" class="label-pc mb-2 text-red-600 dark:text-red-400">Días Vencidos</label>
                                     <input type="number" name="accumulated_days_to_take" id="accumulated_days_to_take" 
-                                           x-model="form.accumulated_days" @input="updateTotalDays" 
-                                           required min="0" :max="employee.accumulated_available"
+                                           x-model="form.accumulated_days" @input="updateTotalDays" required min="0" :max="employee.accumulated_available"
                                            class="input-pc bg-red-50/50 text-red-900 border-red-200 dark:bg-slate-800 dark:border-slate-700 dark:text-red-400 text-center font-bold">
                                 </div>
                             </div>
@@ -240,7 +237,8 @@
 @push('scripts')
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('vacationForm', () => ({
+        Alpine.data('vacationForm', (contingenciesData = []) => ({
+            contingencies: contingenciesData,
             // Búsqueda
             searchTerm: '',
             suggestions: [],
@@ -404,13 +402,51 @@
             },
 
             calculateEndDate() {
-                if (!this.form.start_date || this.totalDays <= 0) return;
-                const start = new Date(this.form.start_date);
-                const days = this.totalDays;
-                if (days <= 0) return;
-                const end = new Date(start);
-                end.setDate(start.getDate() + days - 1); // -1 para que si pide 1 día, sea la misma fecha
-                this.form.end_date = end.toISOString().split('T')[0];
+                if (!this.form.start_date || this.totalDays <= 0) {
+                    this.form.end_date = '';
+                    return;
+                }
+
+                let remainingDays = this.totalDays;
+                let curDate = new Date(this.form.start_date + 'T00:00:00');
+                
+                // Mientras queden días por asignar
+                while (remainingDays > 0) {
+                    const dayOfWeek = curDate.getDay();
+                    const dateString = curDate.toISOString().split('T')[0];
+                    
+                    // Comprobar si es fin de semana
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                    
+                    // Comprobar si está en contingencia
+                    let isContingency = false;
+                    for (let plan of this.contingencies) {
+                        if (dateString >= plan.start_date && dateString <= plan.end_date) {
+                            isContingency = true;
+                            break;
+                        }
+                    }
+
+                    // Si no es fin de semana ni contingencia, consumimos 1 día solicitado
+                    if (!isWeekend && !isContingency) {
+                        remainingDays--;
+                    }
+
+                    // Avanzar al siguiente día, solo si quedan días (para no avanzar de más al final)
+                    if (remainingDays > 0) {
+                        curDate.setDate(curDate.getDate() + 1);
+                    }
+                }
+
+                this.form.end_date = curDate.toISOString().split('T')[0];
+                this.validateDays();
+            },
+
+            updateTotalDays() {
+                const reg = parseInt(this.form.regular_days) || 0;
+                const acc = parseInt(this.form.accumulated_days) || 0;
+                this.totalDays = reg + acc;
+                this.calculateEndDate();
             },
 
             validateDays() {

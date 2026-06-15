@@ -83,6 +83,26 @@
 
         document.getElementById('map').classList.remove('skeleton');
     });
+
+    document.querySelectorAll('.confirm-complete').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Finalizar misión?',
+                text: 'Esta acción marcará el despliegue como completado.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, finalizar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    });
 </script>
 @endpush
 @endsection
@@ -312,6 +332,16 @@
                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-slate-800 text-indigo-400 hover:bg-indigo-400 hover:text-white transition-all shadow-sm border border-transparent hover:border-indigo-400">
                                 <i class="fas fa-edit text-xs"></i>
                             </a>
+                            @if($status === 'en_curso')
+                                <form action="{{ route('deployments.complete', $deployment) }}" method="POST" class="inline-block confirm-complete">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" title="Finalizar Misión"
+                                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-slate-800 text-green-500 hover:bg-green-500 hover:text-white transition-all shadow-sm border border-transparent hover:border-green-500">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </div>

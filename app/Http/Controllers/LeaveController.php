@@ -7,6 +7,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Facades\ActivityLogger;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class LeaveController extends Controller
@@ -122,7 +123,7 @@ class LeaveController extends Controller
             return back()->withInput()->with('error', $overlapMessage);
         }
 
-        Leave::create([
+        $leave = Leave::create([
             'employee_id' => $validated['employee_id'],
             'start_date' => $startDate,
             'end_date' => $endDate,
@@ -133,6 +134,8 @@ class LeaveController extends Controller
             'medical_condition' => $validated['medical_condition'],
             'status' => 'pendiente',
         ]);
+        
+        ActivityLogger::log('create', 'leaves', "Se registró un reposo médico para el empleado ID: {$leave->employee_id}");
 
         return redirect()->route('leaves.index')->with('success', 'Reposo registrado correctamente.');
     }
@@ -192,13 +195,17 @@ class LeaveController extends Controller
             $this->autoJustifyAttendances($leave);
         }
 
+        ActivityLogger::log('update', 'leaves', "Se actualizó el reposo médico ID: {$leave->id}");
+
         return redirect()->route('leaves.index')->with('success', 'Reposo actualizado correctamente.');
     }
 
     public function destroy(Leave $leave)
     {
         $this->authorize('delete', $leave);
+        $id = $leave->id;
         $leave->delete();
+        ActivityLogger::log('delete', 'leaves', "Se eliminó el reposo médico ID: {$id}");
         return redirect()->route('leaves.index')->with('success', 'Reposo eliminado correctamente.');
     }
 
@@ -212,6 +219,8 @@ class LeaveController extends Controller
         
         $this->autoJustifyAttendances($leave);
 
+        ActivityLogger::log('update', 'leaves', "Se aprobó el reposo médico ID: {$leave->id}");
+
         return redirect()->route('leaves.index')->with('success', 'Reposo aprobado.');
     }
 
@@ -222,6 +231,7 @@ class LeaveController extends Controller
             'status' => 'rechazado',
             'approved_by' => Auth::id(),
         ]);
+        ActivityLogger::log('update', 'leaves', "Se rechazó el reposo médico ID: {$leave->id}");
         return redirect()->route('leaves.index')->with('success', 'Reposo rechazado.');
     }
 

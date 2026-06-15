@@ -419,6 +419,10 @@
                 this.participantError = '';
                 const form = document.getElementById('deployment-form');
                 
+                if (!form.reportValidity()) {
+                    return;
+                }
+                
                 // Limpiar inputs previos si existieran
                 form.querySelectorAll('input[name^="participants["]').forEach(el => el.remove());
                 

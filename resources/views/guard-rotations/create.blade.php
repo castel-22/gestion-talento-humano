@@ -8,6 +8,21 @@
                 <h2 class="text-2xl font-bold text-pc-blue">Nueva Rotación de Guardia</h2>
             </div>
 
+            @if($errors->any() || session('error'))
+            <div class="m-6 mb-0 bg-red-50 border-l-4 border-red-500 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0"><i class="fas fa-exclamation-circle text-red-500"></i></div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-bold text-red-700">Ocurrieron los siguientes errores:</h3>
+                        <ul class="mt-1 list-disc list-inside text-xs text-red-600 font-medium">
+                            @if(session('error')) <li>{{ session('error') }}</li> @endif
+                            @foreach($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <form action="{{ route('guard-rotations.store') }}" method="POST" class="p-6">
                 @csrf
 

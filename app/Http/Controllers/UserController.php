@@ -46,6 +46,9 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
         $roles = Role::all();
+        if (!Auth::user()->hasRole('administrador')) {
+            $roles = $roles->reject(fn($r) => $r->name === 'administrador');
+        }
         $securityQuestions = SecurityQuestion::all();
         return view('users.create', compact('roles', 'securityQuestions'));
     }
@@ -63,6 +66,10 @@ class UserController extends Controller
             'security_questions.*.question_id' => 'required|exists:security_questions,id',
             'security_questions.*.answer' => 'required|string|min:2',
         ]);
+
+        if (!Auth::user()->hasRole('administrador') && $request->role === 'administrador') {
+            abort(403, 'No tienes permisos para asignar el rol de administrador.');
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -93,7 +100,16 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $this->authorize('update', $user);
+        
+        if (!Auth::user()->hasRole('administrador') && $user->hasRole('administrador')) {
+            abort(403, 'No tienes permisos para editar a un administrador.');
+        }
+
         $roles = Role::all();
+        if (!Auth::user()->hasRole('administrador')) {
+            $roles = $roles->reject(fn($r) => $r->name === 'administrador');
+        }
+
         $securityQuestions = SecurityQuestion::all();
         $userAnswers = $user->securityAnswers;
         return view('users.edit', compact('user', 'roles', 'securityQuestions', 'userAnswers'));
@@ -112,6 +128,12 @@ class UserController extends Controller
             'security_questions.*.question_id' => 'required_with:security_questions|exists:security_questions,id',
             'security_questions.*.answer' => 'required_with:security_questions|string|min:2',
         ]);
+
+        if (!Auth::user()->hasRole('administrador')) {
+            if ($user->hasRole('administrador') || $request->role === 'administrador') {
+                abort(403, 'No tienes permisos para gestionar roles de administrador.');
+            }
+        }
 
         $user->name = $request->name;
         $user->email = $request->email;
