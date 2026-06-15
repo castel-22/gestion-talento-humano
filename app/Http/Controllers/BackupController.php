@@ -106,12 +106,7 @@ class BackupController extends Controller
             $sql = file_get_contents($absolutePath);
             DB::unprepared($sql);
 
-            // Deslogueo para evitar inconsistencias de sesión con datos antiguos
-            Auth::logout();
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
-
-            return redirect()->route('login')->with('success', 'El sistema ha sido restaurado exitosamente al punto seleccionado. Por favor, inicie sesión de nuevo.');
+            return redirect()->route('backups.index')->with('success', 'El sistema ha sido restaurado exitosamente al punto seleccionado.');
         } catch (\Exception $e) {
             return redirect()->route('backups.index')->with('error', 'Ocurrió un error al restaurar la base de datos: ' . $e->getMessage());
         }
