@@ -169,15 +169,21 @@
                         </div>
 
                         <div class="group">
-                            <label for="end_date" class="label-pc mb-2">Fecha de Culminación <span class="text-pc-red">*</span></label>
+                            <label for="end_date" class="label-pc mb-2 flex items-center gap-2">
+                                Fecha de Culminación 
+                                <span class="group/tooltip relative cursor-help">
+                                    <i class="fas fa-info-circle text-pc-orange/70 hover:text-pc-orange transition-colors"></i>
+                                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-800 text-white text-[10px] font-normal normal-case rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50 text-center leading-tight shadow-xl">
+                                        El sistema calcula esta fecha automáticamente omitiendo sábados, domingos y planes de contingencia (feriados).
+                                        <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                    </span>
+                                </span>
+                            </label>
                             <div class="relative">
                                 <i class="fas fa-calendar-check absolute left-4 top-3.5 text-gray-400"></i>
                                 <input type="date" name="end_date" id="end_date" x-model="form.end_date" required min="{{ date('Y-m-d') }}"
                                        class="input-pc pl-12 bg-gray-100 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 font-bold border-dashed cursor-not-allowed" readonly>
                             </div>
-                            <p class="text-[10px] text-pc-orange dark:text-orange-400 mt-2 font-black uppercase tracking-wider flex items-center gap-1.5">
-                                <i class="fas fa-info-circle text-pc-orange"></i> Se calcula omitiendo fines de semana y contingencias
-                            </p>
                             @error('end_date')<p class="mt-1 text-xs text-red-600 font-bold">{{ $message }}</p>@enderror
                         </div>
                     </div>

@@ -67,10 +67,18 @@
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-pc-orange focus:ring focus:ring-pc-orange focus:ring-opacity-50">
                     </div>
                     <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                            Fecha de Fin
+                            <span class="group relative cursor-help">
+                                <i class="fas fa-info-circle text-pc-orange/70 hover:text-pc-orange transition-colors"></i>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-800 text-white text-[10px] font-normal normal-case rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center leading-tight shadow-xl">
+                                    El sistema calcula esta fecha automáticamente omitiendo sábados, domingos y planes de contingencia (feriados).
+                                    <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                </span>
+                            </span>
+                        </label>
                         <input type="date" name="end_date" x-model="form.end_date" required min="{{ date('Y-m-d') }}"
                                class="w-full border-gray-300 rounded-lg shadow-sm bg-gray-50 cursor-not-allowed border-dashed text-gray-500" readonly>
-                        <p class="text-[10px] text-pc-orange mt-1">Se calcula omitiendo fines de semana y contingencias</p>
                     </div>
                 </div>
 
