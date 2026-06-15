@@ -29,7 +29,7 @@
 <body class="font-sans antialiased bg-gray-100 dark:bg-slate-950 transition-colors duration-300">
     <div class="min-h-screen" x-data="{ sidebarOpen: false }">
         <!-- Navbar superior -->
-        <nav class="bg-white shadow-md sticky top-0 z-10">
+        <nav class="bg-white shadow-md sticky top-0 z-[100]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-20">
                     <!-- Botón Hamburguesa para Móvil -->
