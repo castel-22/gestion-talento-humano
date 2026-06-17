@@ -9,7 +9,7 @@
         
         /* ── Estilo Ejecutivo Minimalista ── */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #1f2937; background: #fff; line-height: 1.2; }
+        body { font-family: Arial, sans-serif; font-size: 8.5pt; color: #1f2937; background: #fff; line-height: 1.2; }
 
         /* ── Header Institucional ── */
         .header-table { width: 100%; border-collapse: collapse; border-bottom: 2px solid #0B3B5E; padding-bottom: 5px; margin-bottom: 10px; border: none; }

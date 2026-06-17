@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Listado de Asistencias</title>
     <style>
-        body { font-family: sans-serif; }
+        body { font-family: Arial, sans-serif; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
