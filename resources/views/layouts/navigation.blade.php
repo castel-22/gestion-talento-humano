@@ -68,6 +68,15 @@
                                     <i class="fas fa-user-edit mr-2 opacity-50"></i> Mi Perfil
                                 </x-dropdown-link>
                                 <div class="my-1 border-t border-gray-100"></div>
+                                <x-dropdown-link :href="asset('manuales/manual_usuario.pdf')" target="_blank" class="rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-pc-orange hover:text-white transition-all">
+                                    <i class="fas fa-book mr-2 opacity-50"></i> Manual de Usuario
+                                </x-dropdown-link>
+                                @if(Auth::user()->hasRole('administrador'))
+                                <x-dropdown-link :href="asset('manuales/manual_tecnico.pdf')" target="_blank" class="rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-pc-orange hover:text-white transition-all">
+                                    <i class="fas fa-tools mr-2 opacity-50"></i> Manual T&eacute;cnico
+                                </x-dropdown-link>
+                                @endif
+                                <div class="my-1 border-t border-gray-100"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <x-dropdown-link :href="route('logout')" 
