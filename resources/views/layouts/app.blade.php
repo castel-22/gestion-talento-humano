@@ -82,7 +82,7 @@
                                     <h4 class="text-[10px] font-black text-pc-blue dark:text-gray-300 uppercase tracking-widest">Centro de Ayuda</h4>
                                 </div>
                                 <div class="py-2">
-                                    <a href="#" onclick="alert('El Manual de Usuario se encuentra en etapa de redacción y diseño. Estará disponible próximamente.'); return false;" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                    <a href="{{ asset('manuales/manual_usuario.pdf') }}" target="_blank" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
                                         <div class="w-8 h-8 rounded-lg bg-pc-blue/10 dark:bg-pc-blue/20 text-pc-blue flex items-center justify-center group-hover:bg-pc-blue group-hover:text-white transition-all">
                                             <i class="fas fa-book-open text-xs"></i>
                                         </div>
@@ -91,7 +91,8 @@
                                             <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Nivel Operativo</p>
                                         </div>
                                     </a>
-                                    <a href="#" onclick="alert('El Manual Técnico se encuentra en etapa de redacción y diseño. Estará disponible próximamente.'); return false;" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                    @if(Auth::user()->hasRole('administrador'))
+                                    <a href="{{ asset('manuales/manual_tecnico.pdf') }}" target="_blank" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
                                         <div class="w-8 h-8 rounded-lg bg-pc-orange/10 dark:bg-pc-orange/20 text-pc-orange flex items-center justify-center group-hover:bg-pc-orange group-hover:text-white transition-all">
                                             <i class="fas fa-laptop-code text-xs"></i>
                                         </div>
@@ -100,6 +101,7 @@
                                             <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Nivel Administrativo</p>
                                         </div>
                                     </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
